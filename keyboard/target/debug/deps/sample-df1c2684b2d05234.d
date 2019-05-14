@@ -1,0 +1,12 @@
+/Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/target/debug/deps/libsample-df1c2684b2d05234.rlib: /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/lib.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/slice.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/conv.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/frame.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/signal.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/rate.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/types.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/window.rs
+
+/Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/target/debug/deps/sample-df1c2684b2d05234.d: /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/lib.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/slice.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/conv.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/frame.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/signal.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/rate.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/types.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/window.rs
+
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/lib.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/slice.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/conv.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/frame.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/signal.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/rate.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/types.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/sample-0.6.2/src/window.rs:

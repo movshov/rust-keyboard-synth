@@ -1,0 +1,1 @@
+{"rustc":15213319881204273412,"features":"[]","target":18369667096769766999,"profile":11870183705523825133,"path":7188767724939585176,"deps":[["pitch_calc v0.11.1","pitch_calc",18162719812941449904],["rand v0.3.23","rand",13566985793104181977],["time_calc v0.11.1","time_calc",2012281246481720595]],"local":[{"Precalculated":"0.1.0"}],"rustflags":[],"edition":"Edition2015"}

@@ -1,0 +1,10 @@
+/Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/target/debug/deps/libenvelope-0e4b747bd459669e.rlib: /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/lib.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/bezier_point.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/ease_point.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/envelope.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/interpolate.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/point.rs
+
+/Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/target/debug/deps/envelope-0e4b747bd459669e.d: /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/lib.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/bezier_point.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/ease_point.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/envelope.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/interpolate.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/point.rs
+
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/lib.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/bezier_point.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/ease_point.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/envelope.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/interpolate.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/envelope-0.8.1/src/point.rs:
