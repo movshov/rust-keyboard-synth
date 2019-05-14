@@ -1,1 +1,0 @@
-{"rustc":15213319881204273412,"features":"[\"audio_unit\", \"core_audio\", \"coreaudio-sys\"]","target":13972643591440289564,"profile":11870183705523825133,"path":13224204549431961027,"deps":[["bitflags v1.0.4","bitflags",8614787292684984689],["coreaudio-sys v0.2.2","coreaudio_sys",7045930479396106905]],"local":[{"Precalculated":"0.9.1"}],"rustflags":[],"edition":"Edition2015"}

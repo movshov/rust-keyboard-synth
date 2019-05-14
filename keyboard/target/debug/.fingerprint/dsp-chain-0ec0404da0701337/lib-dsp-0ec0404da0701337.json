@@ -1,1 +1,0 @@
-{"rustc":15213319881204273412,"features":"[]","target":174043807408335391,"profile":11870183705523825133,"path":12233710318067554709,"deps":[["daggy v0.4.1","daggy",11299270713985411235],["sample v0.6.2","sample",8786852407596891033]],"local":[{"Precalculated":"0.13.1"}],"rustflags":[],"edition":"Edition2015"}
