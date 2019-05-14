@@ -5,21 +5,26 @@
  * notes. 
  */
 
-mod sound;
 
 use std::io::{stdin, stdout, Write};
 use std::error::Error;
+use std::f64;
 //use std::thread;
-use midir::{MidiInput, Ignore};
+use midir::{MidiInput, MidiOutput, Ignore};
 use wmidi::MidiMessage::{self, *};
-//use pitch_calc::Step;
-//use dimensioned::si;
-//use synth::Synth;
+use pitch_calc::{Step,Hz,Letter,LetterOctave,ScaledPerc};
+use dimensioned::si;
+use synth::Synth;
+//use rodio::Source;
+//use beep::beep;
+
+
 pub fn run() -> Result<(), Box<Error>> {
     let mut input = String::new();
     
-    let mut midi_in = MidiInput::new("midir forwarding input")?;
+    let mut midi_in = MidiInput::new("midir input")?;
     midi_in.ignore(Ignore::None);
+    let midi_out = MidiOutput::new("midir output")?;
     println!("Available input ports:"); 
     for i in 0..midi_in.port_count() {
         println!("{}: {}", i, midi_in.port_name(i)?);
@@ -28,15 +33,35 @@ pub fn run() -> Result<(), Box<Error>> {
     stdout().flush()?;
     stdin().read_line(&mut input)?;
     let in_port: usize = input.trim().parse()?; 
+
+    println!("\nAvailable output ports:");
+    for i in 0..midi_out.port_count(){
+        println!("{}: {}", i, midi_out.port_name(i)?);
+    }
+    println!("Please select output port: ");
+    stdout().flush()?;
+    input.clear();
+    stdin().read_line(&mut input)?;
+    let out_port: usize = input.trim().parse()?;
+
     println!("\nOpening connections");
     let in_port_name = midi_in.port_name(in_port)?;
+    let out_port_name = midi_out.port_name(out_port)?;
 
+    let mut conn_out = midi_out.connect(out_port, "midi-forward")?;
+    const NOTE_ON_MSG: u8 = 0x90;
+    const NOTE_OFF_MSG: u8 = 0x80;
+    let _ = conn_out.send(&[NOTE_ON_MSG, 63, 100]);
     //_conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
     let _conn_in = midi_in.connect(in_port, "midir-forward", move |_stamp, message, _| {
+        conn_out.send(message).unwrap_or_else(|_| println!("Error when forwarding message ... "));
         match MidiMessage::from_bytes(message){
-            Ok(NoteOn(_, _, _)) => {
-                println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
-                sound::generate_sound()
+            Ok(NoteOn(_, note, velocity)) => {
+                if velocity != 0{   //the key is only being pressed down. 
+                    println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
+                    generate_sound(Step(note as f32).hz(), velocity as f32);    //note by default is U8 "8bit unsigned integer".          
+                    let _ = conn_out.send(&[NOTE_ON_MSG, note, velocity]);
+                }
             },
             //Ok(NoteOff(_, _, _)) => println!("NoteOff {:?}", message), //will never happen with my midi cable.
             _ => {}}}, ())?;
@@ -47,4 +72,76 @@ pub fn run() -> Result<(), Box<Error>> {
     println!("Closing connection");
     Ok(())
 }
+
+/*Purpose: Generate a sound having been given the frequency and the velocity.  
+* note should now be the frequency that we want to play. 
+* velocity is how hard the user pressed the piano key assuming that it has a 
+* way of recording velocity.
+* If the velocity is 0 it means the user has let go of the key. 
+*/
+fn generate_sound(note:f32, velocity:f32){
+    //let device = rodio::default_output_device().unwrap();
+    //rodio::play_raw(&device, note.sin());
+    //beep(note.sin());
+
+    let mut synth = {
+        use synth::{Point, Oscillator, oscillator, Envelope};
+
+        // The following envelopes should create a downward pitching sine wave that gradually quietens.
+        // Try messing around with the points and adding some of your own!
+        let amp_env = Envelope::from(vec!(
+                //         Time ,  Amp ,  Curve
+                Point::new(0.0  ,  0.0 ,  0.0),
+                Point::new(0.01 ,  1.0 ,  0.0),
+                Point::new(0.45 ,  1.0 ,  0.0),
+                Point::new(0.81 ,  0.8 ,  0.0),
+                Point::new(1.0  ,  0.0 ,  0.0),
+                ));
+        let freq_env = Envelope::from(vec!(
+                //         Time    , Freq   , Curve
+                Point::new(0.0     , 0.0    , 0.0),
+                Point::new(0.00136 , 1.0    , 0.0),
+                Point::new(0.015   , 0.02   , 0.0),
+                Point::new(0.045   , 0.005  , 0.0),
+                Point::new(0.1     , 0.0022 , 0.0),
+                Point::new(0.35    , 0.0011 , 0.0),
+                Point::new(1.0     , 0.0    , 0.0),
+                ));
+
+        // Now we can create our oscillator from our envelopes.
+        // There are also Sine, Noise, NoiseWalk, SawExp and Square waveforms.
+        let oscillator = Oscillator::new(oscillator::waveform::Square, amp_env, freq_env, ());
+
+        // Here we construct our Synth from our oscillator.
+        Synth::retrigger(())
+            .oscillator(oscillator) // Add as many different oscillators as desired.
+            .duration(6000.0) // Milliseconds.
+            //.base_pitch(LetterOctave(Letter::C, 1).hz()) // Hz.
+            .base_pitch(note) // Hz.
+            .loop_points(0.49, 0.51) // Loop start and end points.
+            .fade(500.0, 500.0) // Attack and Release in milliseconds.
+            .num_voices(16) // By default Synth is monophonic but this gives it `n` voice polyphony.
+            .volume(1.0)
+            .detune(0.5)
+            .spread(1.0)
+
+            // Other methods include:
+            // .loop_start(0.0)
+            // .loop_end(1.0)
+            // .attack(ms)
+            // .release(ms)
+            // .note_freq_generator(nfg)
+            // .oscillators([oscA, oscB, oscC])
+            // .volume(1.0)
+    };
+
+    synth.note_on(note, velocity);
+    println!("playing note {}\n", note);
+}
+
+
+
+
+
+
 

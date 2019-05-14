@@ -1,0 +1,9 @@
+/Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/target/debug/deps/libslice_deque-eb164840c35c2699.rlib: /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/lib.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/macros.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/mod.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/buffer.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/macos.rs
+
+/Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/target/debug/deps/slice_deque-eb164840c35c2699.d: /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/lib.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/macros.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/mod.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/buffer.rs /Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/macos.rs
+
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/lib.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/macros.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/mod.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/buffer.rs:
+/Users/barmovshovich/.cargo/registry/src/github.com-1ecc6299db9ec823/slice-deque-0.2.3/src/mirrored/macos.rs:
