@@ -11,15 +11,22 @@ use std::error::Error;
 //use std::time::Duration;
 //use std::thread::sleep;
 //use std::{thread, time};
-use midir::{MidiInput, MidiOutput, Ignore};
-use wmidi::MidiMessage::{self, *};
-use pitch_calc::{Step,Hz,Letter,LetterOctave,ScaledPerc};
+use midir::{MidiInput, MidiOutput, Ignore}; //MIDI reader/writer.
+use wmidi::MidiMessage::{self, *};  //MIDI message converter. 
+use pitch_calc::Step;
+//use pitch_calc::{Step,Hz,Letter,LetterOctave,ScaledPerc};
 //use dimensioned::si::Hertz;
 //use dimensioned::si;
 //use dimensioned::dimensions::Frequency;
-use synth::Synth;
+use sound_stream::{CallbackFlags, CallbackResult, SoundStream, Settings, StreamParams};
+use core::f32::consts::PI;
 
 
+
+/*Purpose: Setup Midi connections to the keyboard and to one output port.  Most likely the output port will also be the keyboard. Once a NOTE_ON input is detected call the generate_sound() function that will take the broken down midi message and generate a sine wave of that note 
+ * along with its desired volume (velocity). Lines 30:80 were based off
+ * of https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs. 
+ */
 pub fn run() -> Result<(), Box<Error>> {
     let mut input = String::new(); 
     let mut midi_in = MidiInput::new("midir input")?;
@@ -49,8 +56,8 @@ pub fn run() -> Result<(), Box<Error>> {
     let _out_port_name = midi_out.port_name(out_port)?;
 
     let mut conn_out = midi_out.connect(out_port, "midi-forward")?;
-    //const NOTE_ON_MSG: u8 = 0x90;
-    const NOTE_OFF_MSG: u8 = 0x80;
+    //const NOTE_ON_MSG: u8 = 0x90; //MIDI default NOTE_ON message.
+    const NOTE_OFF_MSG: u8 = 0x80;  //MIDI default NOTE_OFF message.
         //_conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
     let _conn_in = midi_in.connect(in_port, "midir-forward", move |_stamp, message, _| {
         conn_out.send(message).unwrap_or_else(|_| println!("Error when forwarding message ... "));
@@ -58,15 +65,14 @@ pub fn run() -> Result<(), Box<Error>> {
             Ok(NoteOn(_, note, velocity)) => {
                 if velocity != 0{   //the key is only being pressed down. 
                     println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
-                    generate_sound(Step(note as f32).hz(), velocity as f32);    //note by default is U8 "8bit unsigned integer".          
+                    //generate_sound(Step(note as f32).hz(), velocity as f32);    //note by default is U8 "8bit unsigned integer".          
+                    generate_sound(Step(f32::from(note)).hz(), f32::from(velocity));    //note by default is U8 "8bit unsigned integer".          
                     //let _ = conn_out.send(&[NOTE_ON_MSG, note, velocity]);  //send NOTE_ON_MSG, play note at ceratin velocity.
-
                 }
-                else{
-                    let _ = conn_out.send(&[NOTE_OFF_MSG, note, 0]);  //send NOTE_OFF_MSG, play note at ceratin velocity.
+                else{   //the  user has let go of the key.
+                    let _ = conn_out.send(&[NOTE_OFF_MSG, note, 0]);  //send NOTE_OFF_MSG, play note at 0 velocity. aka turn off note. 
                 }
             },
-            //Ok(NoteOff(_, _, _)) => println!("NoteOff {:?}", message), //will never happen with my midi cable.
             _ => {}}}, ())?;
 
     println!("Connection open, forwarding from '{}' to '{}' (press enter to exit) ...", _in_port_name, _out_port_name);
@@ -78,66 +84,41 @@ pub fn run() -> Result<(), Box<Error>> {
 
 /*Purpose: Generate a sound having been given the frequency and the velocity.  
 * note should now be the frequency that we want to play. 
-* velocity is how hard the user pressed the piano key assuming that it has a 
+* velocity is how hard the user pressed the piano key assuming that the keyboard has 
 * way of recording velocity.
-* If the velocity is 0 it means the user has let go of the key. 
 */
 fn generate_sound(_note:f32, _velocity:f32){
-    let mut synth = {
-        use synth::{Point, Oscillator, oscillator, Envelope};
+//Sample rate.
+let rate:f32 = 48000.0;
 
-        // The following envelopes should create a downward pitching sine wave that gradually quietens.
-        // Try messing around with the points and adding some of your own!
-        let amp_env = Envelope::from(vec!(
-                //         Time ,  Amp ,  Curve
-                Point::new(0.0  ,  0.0 ,  0.0),
-                Point::new(0.01 ,  1.0 ,  0.0), Point::new(0.45 ,  1.0 ,  0.0),
-                Point::new(0.81 ,  0.8 ,  0.0),
-                Point::new(1.0  ,  0.0 ,  0.0),
-                ));
-        let freq_env = Envelope::from(vec!(
-                //         Time    , Freq   , Curve
-                Point::new(0.0     , 0.0    , 0.0),
-                Point::new(0.00136 , 1.0    , 0.0),
-                Point::new(0.015   , 0.02   , 0.0),
-                Point::new(0.045   , 0.005  , 0.0),
-                Point::new(0.1     , 0.0022 , 0.0),
-                Point::new(0.35    , 0.0011 , 0.0),
-                Point::new(1.0     , 0.0    , 0.0),
-                ));
+//Keymap contains currently-held notes for keys.
+//let keymap = dict()
 
-        // Now we can create our oscillator from our envelopes.
-        // There are also Sine, Noise, NoiseWalk, SawExp and Square waveforms.
-        let oscillator = Oscillator::new(oscillator::waveform::Sine, amp_env, freq_env, ());
+//Note map contains currently-playing operators.
+//let notemap = set();
 
-        // Here we construct our Synth from our oscillator.
-        Synth::retrigger(())
-            .oscillator(oscillator) // Add as many different oscillators as desired.
-            .duration(6000.0) // Milliseconds.
-            //.base_pitch(LetterOctave(Letter::C, 1).hz()) // Hz.
-            .base_pitch(_note) // Hz.
-            .loop_points(0.49, 0.51) // Loop start and end points.
-            .fade(500.0, 500.0) // Attack and Release in milliseconds.
-            .num_voices(16) // By default Synth is monophonic but this gives it `n` voice polyphony.
-            .volume(1.0)
-            .detune(0.5)
-            .spread(1.0)
+//Conversion factor for Hz to radians.
+let _hz_to_rads = 2 as f32 * PI / rate;
 
-            // Other methods include:
-            // .loop_start(0.0)
-            // .loop_end(1.0)
-            // .attack(ms)
-            // .release(ms)
-            // .note_freq_generator(nfg)
-            // .oscillators([oscA, oscB, oscC])
-            // .volume(1.0)
-    };
+//Attack time in secs and samples for AR envelope.
+let _t_attack = 0.010;
+let _s_attack = rate * _t_attack;
 
-    synth.note_on(_note, _velocity);
-    println!("playing note {}\n", _note);
+//Release time in secs and samples for AR envelope.
+let _t_release = 0.30;
+let _s_release = rate * _t_release;
+
+
+envelope();
 
 }
+/*Purpose: Alter the sine wave that gets passed in to better match the 
+ * desired sound we want to hear. The goal for this assignment is to 
+ * get the sine wave to sound like a grand piano if possible. 
+ */
+fn envelope(){
 
 
+}
 
 
