@@ -109,16 +109,61 @@ let _t_release = 0.30;
 let _s_release = rate * _t_release;
 
 
-envelope();
+//envelope();
 
 }
-/*Purpose: Alter the sine wave that gets passed in to better match the 
- * desired sound we want to hear. The goal for this assignment is to 
- * get the sine wave to sound like a grand piano if possible. 
- */
-fn envelope(){
 
-
+//Convert a note (pitch) to its corresponding frequency.
+//Note 0 is A4 (440 Hz). 
+/*fn note_to_freq(note){
+    return _hz_to_rads * 440 * 2**((note - 69) / 12);
 }
+*/
+// Conversion table for keys to radian frequencies.
+//let key_to_freq = [note_to_freq(key) for key in range(128)];
+
+//Conversion table for keys to radian mod frequencies.
+//let key_to_mod_freq = [key_to_freq[key] + fmod * hz_to_rads for key in range(128)];
+
+struct Op {
+    //FM Operator
+    t: i64,
+    key: String,
+    //release_time: Option<i64>,
+ //   wc: key_to_freq[key],
+  //  wm: key_to_mod_freq[key]
+}
+
+impl Op {
+    /*fn release_time(&self) -> Option<Tm> {
+        self.release_time.map(|t| time::at(Timespec::new(t,0)))
+    }*/
+
+    // Purpose: Note is turned off. Start release.
+    fn off(&mut self){
+      //  self.release_time = self.t;
+    }
+
+    /*Purpose: Alter the sine wave that gets passed in to better match the 
+     * desired sound we want to hear. The goal for this assignment is to 
+     * get the sine wave to sound like a grand piano if possible. 
+     */
+    fn envelope(&mut self){
+    /* """Return the envelope for the given note at the given time.
+     * Returns None when note should be dropped."""
+     */
+       //t = self.t;
+       /* if self.release_time != 0:
+            let _rt = _t - self.release_time
+            if _rt >= s_release:
+                return 0 
+            return 1.0 - _rt / s_release
+        if _t < s_attack:
+            return _t / s_attack
+        return 1.0*/
+    }
+}
+
+
 
 
