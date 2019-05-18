@@ -5,12 +5,9 @@
  * notes. 
  */
 
-
 use std::io::{stdin, stdout, Write};
 use std::error::Error;
-//use std::time::Duration;
-//use std::thread::sleep;
-//use std::{thread, time};
+//use std::time::Duration; use std::thread::sleep; use std::{thread, time};
 use midir::{MidiInput, MidiOutput, Ignore}; //MIDI reader/writer.
 use wmidi::MidiMessage::{self, *};  //MIDI message converter. 
 use pitch_calc::Step;
@@ -19,14 +16,14 @@ use pitch_calc::Step;
 //use dimensioned::si;
 //use dimensioned::dimensions::Frequency;
 use sound_stream::{CallbackFlags, CallbackResult, SoundStream, Settings, StreamParams};
-use core::f32::consts::PI;
+use core::f64::consts::PI;
+
 
 
 
 /*Purpose: Setup Midi connections to the keyboard and to one output port.  Most likely the output port will also be the keyboard. Once a NOTE_ON input is detected call the generate_sound() function that will take the broken down midi message and generate a sine wave of that note 
  * along with its desired volume (velocity). Lines 30:80 were based off
- * of https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs. 
- */
+ * of https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs.  */ 
 pub fn run() -> Result<(), Box<Error>> {
     let mut input = String::new(); 
     let mut midi_in = MidiInput::new("midir input")?;
@@ -65,8 +62,8 @@ pub fn run() -> Result<(), Box<Error>> {
             Ok(NoteOn(_, note, velocity)) => {
                 if velocity != 0{   //the key is only being pressed down. 
                     println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
-                    //generate_sound(Step(note as f32).hz(), velocity as f32);    //note by default is U8 "8bit unsigned integer".          
-                    generate_sound(Step(f32::from(note)).hz(), f32::from(velocity));    //note by default is U8 "8bit unsigned integer".          
+                    //generate_sound(Step(note as f32).hz(), velocity as f32);    //note by default is U7 "7 bit unsigned integer".          
+                    generate_sound(note, velocity);    //note and velocity by default are U7 "7 bit unsigned integer".          
                     //let _ = conn_out.send(&[NOTE_ON_MSG, note, velocity]);  //send NOTE_ON_MSG, play note at ceratin velocity.
                 }
                 else{   //the  user has let go of the key.
@@ -81,15 +78,25 @@ pub fn run() -> Result<(), Box<Error>> {
     println!("Closing connection");
     Ok(())
 }
+//Convert a note (pitch) to its corresponding frequency
+//Formula = 2^((m-69)/12) * 440
+fn note_to_frequency(_note:i32) -> f64{
+    println!("note is {}\n", _note);
+    let base:f64 = 2.00;
+    440.00 * base.powi((_note - 69)/12)
+}
 
+fn sine_wave(phase: f64) -> f32 {
+    ((phase * ::std::f64::consts::PI * 2.0).sin() * 0.5) as f32
+}
 /*Purpose: Generate a sound having been given the frequency and the velocity.  
 * note should now be the frequency that we want to play. 
 * velocity is how hard the user pressed the piano key assuming that the keyboard has 
 * way of recording velocity.
 */
-fn generate_sound(_note:f32, _velocity:f32){
+pub fn generate_sound(_note:u8, _velocity:u8){
 //Sample rate.
-let rate:f32 = 48000.0;
+let rate = 48000.00;
 
 //Keymap contains currently-held notes for keys.
 //let keymap = dict()
@@ -98,7 +105,7 @@ let rate:f32 = 48000.0;
 //let notemap = set();
 
 //Conversion factor for Hz to radians.
-let _hz_to_rads = 2 as f32 * PI / rate;
+let _hz_to_rads = 2.00 * PI / rate;
 
 //Attack time in secs and samples for AR envelope.
 let _t_attack = 0.010;
@@ -108,8 +115,32 @@ let _s_attack = rate * _t_attack;
 let _t_release = 0.30;
 let _s_release = rate * _t_release;
 
+let mut _frequency = note_to_frequency(_note as i32);
+println!("note to frequency is: {}\n", _frequency);
 
-envelope();
+//envelope();
+let mut count = 3.0;
+let mut phase = 0.0;
+let callback = Box::new(move |output: &mut[f32], settings: Settings, dt:f64, _: CallbackFlags| {
+    for frame in output.chunks_mut(settings.channels as usize) {
+        let amp = sine_wave(phase);
+        for channel in frame {
+            *channel = amp;
+        }
+    //phase  += 440.00 / settings.sample_hz as f64;
+    phase += _frequency/rate;
+}
+count -= dt;
+if count >= 0.0 { 
+    CallbackResult::Continue 
+} 
+else { 
+    CallbackResult::Complete 
+}
+});
+
+let stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
+while let Ok(true) = stream.is_active() {}
 
 }
 /*Purpose: Alter the sine wave that gets passed in to better match the 
