@@ -6,4 +6,4 @@ CS410 Rust Programming
 # Bart's Example - https://github.com/pdx-cs-sound/fm/blob/master/fm.py
 # Midi message breakdown - https://github.com/wmedrano/wmidi/blob/master/src/lib.rs 
 # Midi message reader - https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs
-
+# Standard MIDI NOTE to Frequency - https://newt.phys.unsw.edu.au/jw/notes.html
