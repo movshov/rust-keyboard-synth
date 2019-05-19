@@ -7,7 +7,7 @@
 
 use std::io::{stdin, stdout, Write};
 use std::error::Error;
-//use std::time::Duration; use std::thread::sleep; use std::{thread, time};
+use std::time::Duration; use std::thread::sleep; use std::{thread, time};
 use midir::{MidiInput, MidiOutput, Ignore}; //MIDI reader/writer.
 use wmidi::MidiMessage::{self, *};  //MIDI message converter. 
 use pitch_calc::Step;
@@ -118,6 +118,22 @@ let _s_release = rate * _t_release;
 let mut _frequency = note_to_frequency(_note as i32);
 println!("note to frequency is: {}\n", _frequency);
 
+// Conversion table for keys to radian frequencies.
+let mut key_to_freq: Vec<f64> = Vec::new();
+
+//Conversion table for keys to radian mod frequencies.
+let mut key_to_mod_freq: Vec<f64> = Vec::new(); 
+
+let fmod_thatwilleventuallyneedtobepassedin = 1.00;
+
+for key in 0..=128 {
+    key_to_freq.push(note_to_frequency(key));
+    key_to_mod_freq.push(key_to_freq[key as usize] + fmod_thatwilleventuallyneedtobepassedin * _hz_to_rads);
+}
+
+println!("\nConversion table for keys to radian frequencies: key_to_freq:\n{:?}", &key_to_freq);
+println!("\nConversion table for keys to radian mod frequencies: key_to_mod_freq:\n{:?}", &key_to_mod_freq);
+
 //envelope();
 let mut count = 3.0;
 let mut phase = 0.0;
@@ -142,6 +158,23 @@ else {
 let stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
 while let Ok(true) = stream.is_active() {}
 
+struct Op {
+    t: u8,
+    key: u8,
+    release_time: Duration,
+}
+
+impl Op {
+    fn new(t: &u8, key: &u8, release_time: &Duration) -> Op {
+        Op{
+            t: *t,
+            key: *key,
+            release_time: *release_time
+        }
+    }
+    /*fn off(&self) -> u8 {
+        self.release_time:self.t
+    }*/
 }
 /*Purpose: Alter the sine wave that gets passed in to better match the 
  * desired sound we want to hear. The goal for this assignment is to 
@@ -151,5 +184,7 @@ fn envelope(){
 
 
 }
+}
+
 
 
