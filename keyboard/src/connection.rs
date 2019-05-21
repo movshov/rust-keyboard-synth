@@ -81,7 +81,7 @@ pub fn run() -> Result<(), Box<Error>> {
 //Convert a note (pitch) to its corresponding frequency
 //Formula = 2^((m-69)/12) * 440
 fn note_to_frequency(_note:i32) -> f64{
-    println!("note is {}\n", _note);
+    // println!("note is {}\n", _note);
     let base:f64 = 2.00;
     440.00 * base.powi((_note - 69)/12)
 }
@@ -128,11 +128,10 @@ let fmod_thatwilleventuallyneedtobepassedin = 1.00;
 
 for key in 0..=128 {
     key_to_freq.push(note_to_frequency(key));
-    key_to_mod_freq.push(key_to_freq[key as usize] + fmod_thatwilleventuallyneedtobepassedin * _hz_to_rads);
 }
 
-println!("\nConversion table for keys to radian frequencies: key_to_freq:\n{:?}", &key_to_freq);
-println!("\nConversion table for keys to radian mod frequencies: key_to_mod_freq:\n{:?}", &key_to_mod_freq);
+// println!("\nConversion table for keys to radian frequencies: key_to_freq:\n{:?}", &key_to_freq);
+// println!("\nConversion table for keys to radian mod frequencies: key_to_mod_freq:\n{:?}", &key_to_mod_freq);
 
 //envelope();
 let mut count = 3.0;
@@ -159,31 +158,43 @@ let stream = SoundStream::new().output(StreamParams::new()).run_callback(callbac
 while let Ok(true) = stream.is_active() {}
 
 struct Op {
-    t: u8,
+    t: Option<Duration>,
     key: u8,
-    release_time: Duration,
+    release_time: Option<Duration>,
+    wc: f64
 }
 
 impl Op {
-    fn new(t: &u8, key: &u8, release_time: &Duration) -> Op {
+    fn new(&self, key: u8, wc: f64) -> Op {
         Op{
-            t: *t,
-            key: *key,
-            release_time: *release_time
+            t: Some(<std::time::Duration>::new(0,0)),
+            key,
+            release_time: None,
+            wc
         }
     }
-    /*fn off(&self) -> u8 {
-        self.release_time:self.t
-    }*/
-}
-/*Purpose: Alter the sine wave that gets passed in to better match the 
- * desired sound we want to hear. The goal for this assignment is to 
- * get the sine wave to sound like a grand piano if possible. 
- */
-fn envelope(){
 
+    fn off(&self) -> Op {
+        Op{
+            t: self.t,
+            key: self.key,
+            release_time:self.t,
+            wc: self.wc,
+        }
+    }
 
-}
+    /*Purpose: Alter the sine wave that gets passed in to better match the 
+    * desired sound we want to hear. The goal for this assignment is to 
+    * get the sine wave to sound like a grand piano if possible. 
+    */
+    // fn envelope(&self) -> f64{
+    //     let t = self.t;
+    //     if std::time::is_zero(t) {
+    //         return 1.0;
+    //     }
+    //     return 1.2;
+    // }
+}t
 }
 
 
