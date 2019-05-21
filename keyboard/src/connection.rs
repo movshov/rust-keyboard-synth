@@ -7,6 +7,7 @@
 
 use std::io::{stdin, stdout, Write};
 use std::error::Error;
+use std::time::Duration; use std::thread::sleep; use std::{thread, time};
 use midir::{MidiInput, MidiOutput, Ignore}; //MIDI reader/writer.
 use wmidi::MidiMessage::{self, *};  //MIDI message converter. 
 use sound_stream::{CallbackFlags, CallbackResult, SoundStream, Settings, StreamParams};
@@ -72,9 +73,6 @@ pub fn run() -> Result<(), Box<Error>> {
     Ok(())
 }
 
-/*Purpose: Convert a note (pitch) to its corresponding frequency
-* using the Formula = 2^((m-69)/12) * 440. 
-*/
 fn note_to_frequency(_hz_to_rads:f64, _note:f64) -> f64{
     println!("note is {}\n", _note);
     let base:f64 = 2.00;
@@ -124,6 +122,21 @@ let mut _frequency1 = note_to_frequency(_hz_to_rads, _note as f64);
 let mut _frequency2 = note_to_frequency(_hz_to_rads, 50 as f64);
 //println!("note to frequency is: {}\n", _frequency);
 
+// Conversion table for keys to radian frequencies.
+let mut key_to_freq: Vec<f64> = Vec::new();
+
+//Conversion table for keys to radian mod frequencies.
+let mut key_to_mod_freq: Vec<f64> = Vec::new(); 
+
+let fmod_thatwilleventuallyneedtobepassedin = 1.00;
+
+for key in 0..=128 {
+    key_to_freq.push(note_to_frequency(key));
+}
+
+// println!("\nConversion table for keys to radian frequencies: key_to_freq:\n{:?}", &key_to_freq);
+// println!("\nConversion table for keys to radian mod frequencies: key_to_mod_freq:\n{:?}", &key_to_mod_freq);
+
 //envelope();
 //let mut count = 3.0;
 //let mut phase = 0.0;
@@ -150,14 +163,44 @@ if time < duration{
 let stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
 while let Ok(true) = stream.is_active() {}
 
+struct Op {
+    t: Option<Duration>,
+    key: u8,
+    release_time: Option<Duration>,
+    wc: f64
 }
-/*Purpose: Alter the sine wave that gets passed in to better match the 
- * desired sound we want to hear. The goal for this assignment is to 
- * get the sine wave to sound like a grand piano if possible. 
- */
-fn envelope(){
 
+impl Op {
+    fn new(&self, key: u8, wc: f64) -> Op {
+        Op{
+            t: Some(<std::time::Duration>::new(0,0)),
+            key,
+            release_time: None,
+            wc
+        }
+    }
 
+    fn off(&self) -> Op {
+        Op{
+            t: self.t,
+            key: self.key,
+            release_time:self.t,
+            wc: self.wc,
+        }
+    }
+
+    /*Purpose: Alter the sine wave that gets passed in to better match the 
+    * desired sound we want to hear. The goal for this assignment is to 
+    * get the sine wave to sound like a grand piano if possible. 
+    */
+    // fn envelope(&self) -> f64{
+    //     let t = self.t;
+    //     if std::time::is_zero(t) {
+    //         return 1.0;
+    //     }
+    //     return 1.2;
+    // }
+}
 }
 
 /*
@@ -168,6 +211,7 @@ from array.
 4. create fucntion to loop through array of keys that are on, calculate sin(_frequency * time) of
 that note and add to amp. Finall return amp to be played in callback. 
 */
+
 
 
 
