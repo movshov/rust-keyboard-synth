@@ -9,8 +9,12 @@ fn main() {
     std::process::exit(1);
   }
   */
-    //make range 21:108
-  connection::generate_sound(60, 80);
+  
+/*
+ * To test code run generage_sound(range, velocity)
+ * make range 21:108
+ */
+  connection::generate_sound(69, 80);
     
 }
 

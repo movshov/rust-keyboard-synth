@@ -77,9 +77,10 @@ pub fn run() -> Result<(), Box<Error>> {
 fn note_to_frequency(_hz_to_rads:f64, _note:f64) -> f64{
     println!("note is {}\n", _note);
     let base:f64 = 2.00;
-    440.00 * base.powf((_note - 69.00)/12.00)
+    _hz_to_rads * 440.00 * base.powf((_note - 69.00)/12.00)
 }
 
+/*
 /*Purpose: Generate a sine wave of a given frequency. 
  */
 fn sine_wave(phase: f64) -> f32 {
@@ -87,8 +88,9 @@ fn sine_wave(phase: f64) -> f32 {
 }
 //=−1/4sin(3𝜋𝑥)+1/4sin(𝜋𝑥)+3/√2cos(𝜋𝑥)
 fn piano_sine(phase: f64) -> f32 {
-    return (-(0.25*(phase * PI * 3.0).sin())+(0.25*(phase * PI).sin())+((3.00/1.41)*(phase * PI).cos())) as f32
+    return (-(0.25*(phase * PI * 3.0).sin())+(0.25*(phase * PI).sin())+(0.866*(phase * PI).cos())) as f32
 }
+*/
 
 /*Purpose: Generate a sound having been given the frequency and the velocity.  
 * note should now be the frequency that we want to play. 
@@ -117,26 +119,29 @@ let _s_attack = rate * _t_attack;
 let _t_release = 0.30;
 let _s_release = rate * _t_release;
 
-let mut _frequency = note_to_frequency(_hz_to_rads, _note as f64);
-println!("note to frequency is: {}\n", _frequency);
+let mut _frequency1 = note_to_frequency(_hz_to_rads, _note as f64);
+let mut _frequency2 = note_to_frequency(_hz_to_rads, 50 as f64);
+//println!("note to frequency is: {}\n", _frequency);
 
 //envelope();
-let mut count = 3.0;
-let mut phase = 0.0;
-let callback = Box::new(move |output: &mut[f32], settings: Settings, dt:f64, _: CallbackFlags| {
+//let mut count = 3.0;
+//let mut phase = 0.0;
+let duration = 3.00 * 48000.00;
+let mut time = 0.00;
+let callback = Box::new(move |output: &mut[f32], settings: Settings, _, _: CallbackFlags| {
     for frame in output.chunks_mut(settings.channels as usize) {
         //let amp = sine_wave(phase);   //normal sine wave.
-        let amp = piano_sine(phase);    //"piano" sine wave.
+        //let amp = piano_sine(_frequency);    //"piano" sine wave.
+        let amp = (f64::sin(_frequency1 * time) + f64::sin(_frequency2 * time)) as f32;   //plays one note at a time. 
         for channel in frame {
             *channel = amp;
         }
-    phase += _frequency/rate;
+    //phase += _frequency/rate;
+    time += 1.00;
 }
-count -= dt;
-if count >= 0.0 { 
+if time < duration{ 
     CallbackResult::Continue 
-} 
-else { 
+} else { 
     CallbackResult::Complete 
 }
 });
@@ -153,5 +158,17 @@ fn envelope(){
 
 
 }
+
+/*
+1. Create an array of existing keys with assocaited _hz_to_rads values. 
+2. Create a play vector of notes to be played with note_ON signal. If note_off is present remove
+from array. 
+3. replace line 132 _frequency with lookup in vector of keys to be played. 
+4. create fucntion to loop through array of keys that are on, calculate sin(_frequency * time) of
+that note and add to amp. Finall return amp to be played in callback. 
+*/
+
+
+
 
 
