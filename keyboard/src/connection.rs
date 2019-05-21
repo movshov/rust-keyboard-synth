@@ -4,7 +4,6 @@
  * can be done to fix this so it may sound a little slow to play the 
  * notes. 
  */
-
 use std::io::{stdin, stdout, Write};
 use std::error::Error;
 use std::time::Duration; use std::thread::sleep; use std::{thread, time};
@@ -21,7 +20,6 @@ pub fn run() -> Result<(), Box<Error>> {
     let mut input = String::new(); 
     let mut midi_in = MidiInput::new("midir input")?;
     midi_in.ignore(Ignore::None);
-    //let midi_out = MidiOutput::new("midir output")?;
     println!("Available input ports:"); 
     for i in 0..midi_in.port_count() {
         println!("{}: {}", i, midi_in.port_name(i)?);
@@ -30,38 +28,22 @@ pub fn run() -> Result<(), Box<Error>> {
     stdout().flush()?;
     stdin().read_line(&mut input)?;
     let in_port: usize = input.trim().parse()?; 
-/*
-    println!("\nAvailable output ports:");
-    for i in 0..midi_out.port_count(){
-        println!("{}: {}", i, midi_out.port_name(i)?);
-    }
-    println!("Please select output port: ");
-    stdout().flush()?;
-    input.clear();
-    stdin().read_line(&mut input)?;
-    let out_port: usize = input.trim().parse()?;
-*/
+
 
     println!("\nOpening connections");
     let _in_port_name = midi_in.port_name(in_port)?;
-//    let _out_port_name = midi_out.port_name(out_port)?;
 
-    //let mut conn_out = midi_out.connect(out_port, "midi-forward")?;
-    //const NOTE_ON_MSG: u8 = 0x90; //MIDI default NOTE_ON message.
     const NOTE_OFF_MSG: u8 = 0x80;  //MIDI default NOTE_OFF message.
         //_conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
     let _conn_in = midi_in.connect(in_port, "midir-forward", move |_stamp, message, _| {
-   //     conn_out.send(message).unwrap_or_else(|_| println!("Error when forwarding message ... "));
         match MidiMessage::from_bytes(message){
             Ok(NoteOn(_, note, velocity)) => {
                 if velocity != 0{   //the key is only being pressed down. 
                     println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
                     //generate_sound(Step(note as f32).hz(), velocity as f32);    //note by default is U7 "7 bit unsigned integer".          
                     generate_sound(note, velocity);    //note and velocity by default are U7 "7 bit unsigned integer".          
-                    //let _ = conn_out.send(&[NOTE_ON_MSG, note, velocity]);  //send NOTE_ON_MSG, play note at ceratin velocity.
                 }
                 else{   //the  user has let go of the key.
-                    //let _ = conn_out.send(&[NOTE_OFF_MSG, note, 0]);  //send NOTE_OFF_MSG, play note at 0 velocity. aka turn off note. 
                 }
             },
             _ => {}}}, ())?;
@@ -74,7 +56,7 @@ pub fn run() -> Result<(), Box<Error>> {
 }
 
 fn note_to_frequency(_hz_to_rads:f64, _note:f64) -> f64{
-    println!("note is {}\n", _note);
+    //println!("note is {}\n", _note);
     let base:f64 = 2.00;
     _hz_to_rads * 440.00 * base.powf((_note - 69.00)/12.00)
 }
@@ -100,23 +82,9 @@ pub fn generate_sound(_note:u8, _velocity:u8){
 //Sample rate.
 let rate = 48000.00;
 
-//Keymap contains currently-held notes for keys.
-//let keymap = dict()
-
-//Note map contains currently-playing operators.
-//let notemap = set();
-
 //Conversion factor for Hz to radians.
 let _hz_to_rads = 2.00 * PI / rate;
 //println!("\n_hz_to_rads: {}\n", _hz_to_rads); //this is correct.
-
-//Attack time in secs and samples for AR envelope.
-let _t_attack = 0.010;
-let _s_attack = rate * _t_attack;
-
-//Release time in secs and samples for AR envelope.
-let _t_release = 0.30;
-let _s_release = rate * _t_release;
 
 let mut _frequency1 = note_to_frequency(_hz_to_rads, _note as f64);
 let mut _frequency2 = note_to_frequency(_hz_to_rads, 50 as f64);
@@ -125,32 +93,20 @@ let mut _frequency2 = note_to_frequency(_hz_to_rads, 50 as f64);
 // Conversion table for keys to radian frequencies.
 let mut key_to_freq: Vec<f64> = Vec::new();
 
-//Conversion table for keys to radian mod frequencies.
-let mut key_to_mod_freq: Vec<f64> = Vec::new(); 
-
-let fmod_thatwilleventuallyneedtobepassedin = 1.00;
-
 for key in 0..=128 {
-    key_to_freq.push(note_to_frequency(key));
+    key_to_freq.push(note_to_frequency(_hz_to_rads, key as f64));
 }
 
 // println!("\nConversion table for keys to radian frequencies: key_to_freq:\n{:?}", &key_to_freq);
-// println!("\nConversion table for keys to radian mod frequencies: key_to_mod_freq:\n{:?}", &key_to_mod_freq);
 
-//envelope();
-//let mut count = 3.0;
-//let mut phase = 0.0;
 let duration = 3.00 * 48000.00;
 let mut time = 0.00;
 let callback = Box::new(move |output: &mut[f32], settings: Settings, _, _: CallbackFlags| {
     for frame in output.chunks_mut(settings.channels as usize) {
-        //let amp = sine_wave(phase);   //normal sine wave.
-        //let amp = piano_sine(_frequency);    //"piano" sine wave.
         let amp = (f64::sin(_frequency1 * time) + f64::sin(_frequency2 * time)) as f32;   //plays one note at a time. 
         for channel in frame {
             *channel = amp;
         }
-    //phase += _frequency/rate;
     time += 1.00;
 }
 if time < duration{ 
@@ -203,7 +159,7 @@ impl Op {
 }
 }
 
-/*
+/*  BARS TODO LIST
 1. Create an array of existing keys with assocaited _hz_to_rads values. 
 2. Create a play vector of notes to be played with note_ON signal. If note_off is present remove
 from array. 
