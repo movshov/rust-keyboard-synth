@@ -20,7 +20,7 @@ pub fn run() -> Result<(), Box<Error>> {
     let mut input = String::new(); 
     let mut midi_in = MidiInput::new("midir input")?;
     midi_in.ignore(Ignore::None);
-    let midi_out = MidiOutput::new("midir output")?;
+    //let midi_out = MidiOutput::new("midir output")?;
     println!("Available input ports:"); 
     for i in 0..midi_in.port_count() {
         println!("{}: {}", i, midi_in.port_name(i)?);
@@ -29,7 +29,7 @@ pub fn run() -> Result<(), Box<Error>> {
     stdout().flush()?;
     stdin().read_line(&mut input)?;
     let in_port: usize = input.trim().parse()?; 
-
+/*
     println!("\nAvailable output ports:");
     for i in 0..midi_out.port_count(){
         println!("{}: {}", i, midi_out.port_name(i)?);
@@ -39,17 +39,18 @@ pub fn run() -> Result<(), Box<Error>> {
     input.clear();
     stdin().read_line(&mut input)?;
     let out_port: usize = input.trim().parse()?;
+*/
 
     println!("\nOpening connections");
     let _in_port_name = midi_in.port_name(in_port)?;
-    let _out_port_name = midi_out.port_name(out_port)?;
+//    let _out_port_name = midi_out.port_name(out_port)?;
 
-    let mut conn_out = midi_out.connect(out_port, "midi-forward")?;
+    //let mut conn_out = midi_out.connect(out_port, "midi-forward")?;
     //const NOTE_ON_MSG: u8 = 0x90; //MIDI default NOTE_ON message.
     const NOTE_OFF_MSG: u8 = 0x80;  //MIDI default NOTE_OFF message.
         //_conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
     let _conn_in = midi_in.connect(in_port, "midir-forward", move |_stamp, message, _| {
-        conn_out.send(message).unwrap_or_else(|_| println!("Error when forwarding message ... "));
+   //     conn_out.send(message).unwrap_or_else(|_| println!("Error when forwarding message ... "));
         match MidiMessage::from_bytes(message){
             Ok(NoteOn(_, note, velocity)) => {
                 if velocity != 0{   //the key is only being pressed down. 
@@ -59,12 +60,12 @@ pub fn run() -> Result<(), Box<Error>> {
                     //let _ = conn_out.send(&[NOTE_ON_MSG, note, velocity]);  //send NOTE_ON_MSG, play note at ceratin velocity.
                 }
                 else{   //the  user has let go of the key.
-                    let _ = conn_out.send(&[NOTE_OFF_MSG, note, 0]);  //send NOTE_OFF_MSG, play note at 0 velocity. aka turn off note. 
+                    //let _ = conn_out.send(&[NOTE_OFF_MSG, note, 0]);  //send NOTE_OFF_MSG, play note at 0 velocity. aka turn off note. 
                 }
             },
             _ => {}}}, ())?;
 
-    println!("Connection open, forwarding from '{}' to '{}' (press enter to exit) ...", _in_port_name, _out_port_name);
+    println!("Connection open, forwarding from '{}' (press enter to exit) ...", _in_port_name);
     input.clear();
     stdin().read_line(&mut input)?; // wait for next enter key press
     println!("Closing connection");
