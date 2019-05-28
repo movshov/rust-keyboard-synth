@@ -7,8 +7,13 @@ fn main() {
     eprintln!("Error: {}", error);
     std::process::exit(1);
   }
+/*
+ * To test code run generage_sound(range, velocity)
+ * make range 21:108
+ */
+//  connection::generate_sound(39, 80);
     
 }
 
 //hi/
-
+//hi
