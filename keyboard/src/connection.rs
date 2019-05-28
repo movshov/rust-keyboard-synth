@@ -9,8 +9,9 @@ use std::error::Error;
 use std::collections::HashSet;
 //use std::time::Duration; 
 //use std::thread::sleep; 
-use std::thread;
+//use std::thread;
 use std::sync::{Arc, Mutex};
+//use std::sync::Mutex;
 use midir::{MidiInput, Ignore}; //MIDI reader/writer.
 use wmidi::MidiMessage::{self, *};  //MIDI message converter. 
 use sound_stream::{CallbackFlags, CallbackResult, SoundStream, Settings, StreamParams};
@@ -21,7 +22,7 @@ const s_release:u64 =  rate * t_release;
 const t_attack:u64 =  0;
 const s_attack:u64 =  rate * t_attack;
 
-#[derive(Hash, Eq, PartialEq, Debug)]
+#[derive(Hash, Eq, PartialEq, Debug, Copy, Clone)]
 struct Op {
     time: u64,
     key: u8,
@@ -30,7 +31,7 @@ struct Op {
 }
 
 impl Op {
-    fn new(&self, key: u8, rads: f64) -> Op {
+    fn new(&self, _key: u8, _rads: f64) -> Op {
         Op{
             time: 0,
             key: 0,
@@ -86,7 +87,7 @@ pub fn run() -> Result<(), Box<Error>> {
 
     //let mut notes_playing:HashSet<Op> = HashSet::new(); //hashset of struct OP of notes currently playing. 
     //let _buffer = Arc::new(Mutex::new(HashSet::new()));   //will not have duplicates. 
-    let _buffer = Mutex::new(HashSet::new());   //will not have duplicates. 
+    let _buffer = Arc::new(Mutex::new(HashSet::new()));   //will not contain duplicates. 
     let playing:bool = true;
 
 /*************************************CALLBACK_START ***********************************/
@@ -112,12 +113,12 @@ pub fn run() -> Result<(), Box<Error>> {
 
     fn apply_envelope(notes_playing:&mut HashSet<Op>) -> u64{
         //*notes_playing = notes_playing.iter().cloned().filter(|Op| Op.envelope() != 0).collect()
-        let mut remove:Vec<&Op> = Vec::new();    //new vector of notes that need to be removed.
+        let mut remove:Vec<Op> = Vec::new();    //new vector of notes that need to be removed.
         let mut result = 0 as f64;
         for note in notes_playing.iter(){   //loop through all notes_playing.
             let env = note.envelope();  //call envelope function for each note.
             if env ==  0.00{   //release is complete get rid of note. 
-                remove.push(note.clone()); //add note to remove vector.
+                remove.push(*note); //add note to remove vector.
             }
             else{
                 result += env * note.calculate_amp(); //calculate sine wave and add to amp.
@@ -159,15 +160,19 @@ pub fn run() -> Result<(), Box<Error>> {
             Ok(NoteOn(_, note, velocity)) => {
                 if velocity != 0{   //the key is only being pressed down. 
                     println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
-                    //notes_playing.insert(Op {time:0, key:note, release_time:0, rads:key_to_freq[note as usize] as u64});
                     {
-                    let mut data = _buffer.lock().unwrap();
-                    data.insert(Op {time:0, key:note, release_time:0, rads:key_to_freq[note as usize] as u64});
+                        let mut data = _buffer.lock().unwrap();
+                        data.insert(Op {time:0, key:note, release_time:0, rads:key_to_freq[note as usize] as u64});
                     }
                 }
                 else{   //the  user has let go of the key NOTE_ON with 0 velocity.
                     println!("Stamp {:?}, NoteOff {:?}",_stamp, message);
-                    //notes_playing.remove(&note);
+                    /*
+                    * {
+                    * let mut data = _buffer.lock().unwrap();
+                    * data.remove(note);
+                    * }
+                    */
                 }
             },
             _ => {}}
