@@ -4,114 +4,75 @@
  * can be done to fix this so it may sound a little slow to play the 
  * notes. 
  */
-use std::io::{stdin, stdout, Write};
-use std::error::Error;
-use std::collections::HashSet;
-//use std::time::Duration; 
+use std::io::{stdin, stdout, Write}; use std::error::Error; use std::collections::HashSet;
 //use std::thread::sleep; 
 //use std::thread;
 use std::sync::{Arc, Mutex};
-//use std::sync::Mutex;
 use midir::{MidiInput, Ignore}; //MIDI reader/writer.
 use wmidi::MidiMessage::{self, *};  //MIDI message converter. 
 use sound_stream::{CallbackFlags, CallbackResult, SoundStream, Settings, StreamParams};
 use core::f64::consts::PI;
-const rate:u64 =48000; //sample rate.
-const t_release:u64 = 0;
-const s_release:u64 =  rate * t_release;
-const t_attack:u64 =  0;
-const s_attack:u64 =  rate * t_attack;
+const RATE:f64 =48000.00; //sample rate.
+const T_RELEASE:f64 = 0.10;
+const S_RELEASE:f64 =  RATE * T_RELEASE;
+const T_ATTACK:f64 =  0.010;
+const S_ATTACK:f64 =  RATE * T_ATTACK;
 
 #[derive(Hash, Eq, PartialEq, Debug, Copy, Clone)]
 struct Op {
     time: u64,
     key: u8,
     release_time: u64,
+    release_length: u64,
     rads: u64
 }
 
 impl Op {
-    fn new(&self, _key: u8, _rads: f64) -> Op {
+    /*
+    fn new(&self, _key: u8, _rads: u64) -> Op {
         Op{
             time: 0,
-            key: 0,
+            key: _key,
             release_time: 0,
-            rads: 0
+            rads: _rads
         }
     }
-
-    fn off(&self) -> Op {
+    */
+    fn off(&self, velocity:u64) -> Op {
         Op{
             time: self.time,
             key: self.key,
             release_time:self.time,
+            release_length: (S_RELEASE as u64) / velocity,
             rads: self.rads,
         }
     }
 
     fn envelope(&self) -> f64 {
-        let t = self.time;
+        let t = self.time as f64;
         if self.release_time != 0{
-            let rt = t - self.release_time;
-            if rt >= s_release{
+            let rt = t - self.release_time as f64;
+            if rt >= S_RELEASE{
                 return 0.00;
             }
-            return 1.00 - (rt / s_release) as f64;
+            return 1.00 - (rt / S_RELEASE) as f64;
         }
-        if t < s_attack{
-            return (t/s_attack) as f64;
+        if t < S_ATTACK{
+            (t/S_ATTACK) as f64
         }
         else{
-            return 1.00; 
+            1.00
         }
     }
 
     fn calculate_amp(mut self) -> f64{
         let amp =  f64::sin(self.rads as f64 * self.time as f64);
         self.time += 1;
-        return amp;
+        amp
     }
 }
 
-/* Purpose: Setup Midi connections to the keyboard and to one output port.  Most likely the output port will also be the keyboard. 
- * Once a NOTE_ON input is detected call the generate_sound() function that will take the broken down midi message and 
- * generate a sine wave of that note along with its desired volume (velocity). Lines 30:80 were based off
- * of https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs.  
- */
-pub fn run() -> Result<(), Box<Error>> {
-    let _hz_to_rads = 2.00 * PI / rate as f64; //Conversion factor for Hz to radians.
-    let mut key_to_freq: Vec<f64> = Vec::new(); // Conversion table for keys to radian frequencies.
-    for key in 0..=128 {
-        key_to_freq.push(note_to_frequency(_hz_to_rads, key as f64));
-    }
-
-    //let mut notes_playing:HashSet<Op> = HashSet::new(); //hashset of struct OP of notes currently playing. 
-    //let _buffer = Arc::new(Mutex::new(HashSet::new()));   //will not have duplicates. 
-    let _buffer = Arc::new(Mutex::new(HashSet::new()));   //will not contain duplicates. 
-    let playing:bool = true;
-
-/*************************************CALLBACK_START ***********************************/
-    let callback = Box::new(move |output: &mut[f32], settings: Settings, _, _: CallbackFlags|{
-        for frame in output.chunks_mut(settings.channels as usize) {
-            let mut data = _buffer.lock().unwrap();    //lock the data so we can use it. 
-            //let amp:f32 = apply_envelope(&mut notes_playing) as f32; 
-            let amp:f32 = apply_envelope(&mut data) as f32; 
-            for channel in frame {
-                *channel = amp;
-            }
-        }
-        if playing == true{ 
-            CallbackResult::Continue 
-        } else { 
-            CallbackResult::Complete 
-        }
-    });
-
-    let stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
-    while let Ok(true) = stream.is_active() {}
-/***********************************END_OF_CALLBACK**********************************/
-
-    fn apply_envelope(notes_playing:&mut HashSet<Op>) -> u64{
+fn apply_envelope(notes_playing:&mut HashSet<Op>) -> u64{
         //*notes_playing = notes_playing.iter().cloned().filter(|Op| Op.envelope() != 0).collect()
         let mut remove:Vec<Op> = Vec::new();    //new vector of notes that need to be removed.
         let mut result = 0 as f64;
@@ -130,8 +91,44 @@ pub fn run() -> Result<(), Box<Error>> {
         } 
         remove.drain(..);   //empty the remove vector. 
         
-        return (0.1 * result) as u64
+        (0.1 * result) as u64   //return the amp to be played of all sine waves combined. 
+}
+/* Purpose: Setup Midi connections to the keyboard and to one output port.  Most likely the output port will also be the keyboard. 
+ * Once a NOTE_ON input is detected call the generate_sound() function that will take the broken down midi message and 
+ * generate a sine wave of that note along with its desired volume (velocity). Lines 30:80 were based off
+ * of https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs.  
+ */
+pub fn run() -> Result<(), Box<Error>> {
+    let _hz_to_rads = 2.00 * PI / RATE as f64; //Conversion factor for Hz to radians.
+    let mut key_to_freq: Vec<f64> = Vec::new(); // Conversion table for keys to radian frequencies.
+    for key in 0..=128 {
+        key_to_freq.push(note_to_frequency(_hz_to_rads, key as f64));
     }
+
+    //let mut notes_playing:HashSet<Op> = HashSet::new(); //hashset of struct OP of notes currently playing. 
+    //let _buffer = Arc::new(Mutex::new(HashSet::new()));   //will not have duplicates. 
+    let _buffer = Arc::new(Mutex::new(HashSet::<Op>::new()));   //create a Mutex containing Hashset of notes currently playing. 
+
+/*************************************CALLBACK_START ***********************************/
+    let buffer_clone = Arc::clone(&_buffer);
+    let callback = Box::new(move |output: &mut[f32], settings: Settings, _, _: CallbackFlags|{
+        for frame in output.chunks_mut(settings.channels as usize) {
+            //println!("inisde callback\n");
+            let mut data = buffer_clone.lock().unwrap();    //lock the data so we can use it. 
+            let amp:f32 = apply_envelope(&mut data) as f32; 
+            for channel in frame {
+                *channel = amp;
+            }
+            //Add break for inf loop. 
+            //TODO need to create close function to change playing to false when user wants to leave. 
+        }
+        CallbackResult::Continue 
+    });
+
+    let stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
+    //while let Ok(true) = stream.is_active() {}
+/***********************************END_OF_CALLBACK**********************************/
+    
     //hashset instead of vector. 
     //
     // call callback here.
@@ -154,26 +151,25 @@ pub fn run() -> Result<(), Box<Error>> {
 
     //const NOTE_OFF_MSG: u8 = 0x80;  //MIDI default NOTE_OFF message.
     //SITS AND BLOCKS UNTIL A KEY IS PRESSED.
-    //let mut new_note = Op {time:0, key:0, release_time:0, rads:0};
+    let buffer_copy = Arc::clone(&_buffer);
     let _receive = midi_in.connect(in_port, "midir-forward", move |_stamp, message, _| {
         match MidiMessage::from_bytes(message){
-            Ok(NoteOn(_, note, velocity)) => {
-                if velocity != 0{   //the key is only being pressed down. 
+            Ok(NoteOn(_, note, _velocity)) => {
+                if _velocity != 0{   //the key is only being pressed down. 
                     println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
-                    {
-                        let mut data = _buffer.lock().unwrap();
-                        data.insert(Op {time:0, key:note, release_time:0, rads:key_to_freq[note as usize] as u64});
-                    }
-                }
-                else{   //the  user has let go of the key NOTE_ON with 0 velocity.
+                    let mut data = buffer_copy.lock().unwrap(); //get mut function.
+                    data.insert(Op {time:0, key:note, release_time:0, release_length:0, rads:key_to_freq[note as usize] as u64});
+                } else{   //the  user has let go of the key NOTE_ON with 0 velocity.
                     println!("Stamp {:?}, NoteOff {:?}",_stamp, message);
-                    /*
-                    * {
-                    * let mut data = _buffer.lock().unwrap();
-                    * data.remove(note);
-                    * }
-                    */
+                    let mut data = buffer_copy.lock().unwrap();    //lock clone of buffer.
+                    data.remove(&Op {time:0, key:note, release_time:0, release_length:0, rads:0});  //remove this note. 
                 }
+            },
+            Ok(NoteOff(_, note, _velocity)) => {
+               println!("Stamp {:?}, NoteOff {:?}",_stamp, message);
+               let mut data = buffer_copy.lock().unwrap();    //lock clone of buffer.
+               data.remove(&Op {time:0, key:note, release_time:0, release_length:0, rads:0});  //remove this note. 
+
             },
             _ => {}}
     }, ())?;
@@ -217,7 +213,7 @@ fn piano_sine(phase: f64) -> f32 {
  *
  *
  */
-/*
+/* Plays a note from notes_playing for 2 seconds. Only works as monophonic in this exmaple. 
 fn generate_sound(mut notes_playing:Vec<Op>){
 let duration = 2.00 * 48000.00;
 let mut time = 0.00;
@@ -242,23 +238,6 @@ if time < duration{
 let stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
 while let Ok(true) = stream.is_active() {}
 
-}
-*/
-/*
-fn apply_envelope(mut notes_playing) -> u64{
-
-    let mut result = 0 as f64;
-    for note in notes_playing{
-        let env = note.envelope();
-        if env ==  0{
-        //notes_playing.remove(note.key as usize);
-        continue;
-        }
-        else{
-            result += env * note.calculate_amp();
-        }
-    }
-    return (0.1 * result) as u64
 }
 */
 /*  BARS TODO LIST
