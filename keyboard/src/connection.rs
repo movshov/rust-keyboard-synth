@@ -5,8 +5,6 @@
  * notes. 
  */
 use std::io::{stdin, stdout, Write}; use std::error::Error; use std::collections::HashSet;
-//use std::thread::sleep; 
-//use std::thread;
 use std::sync::{Arc, Mutex};
 use midir::{MidiInput, Ignore}; //MIDI reader/writer.
 use wmidi::MidiMessage::{self, *};  //MIDI message converter. 
@@ -24,17 +22,20 @@ struct Op {
     key: u8,
     release_time: u64,
     release_length: u64,
-    rads: u64
+    rads: u64,
+    velocity: u8
 }
 
 impl Op {
     /*
-    fn new(&self, _key: u8, _rads: u64) -> Op {
+    fn new(&self, _key: u8, _rads: u64, _velocity: u8) -> Op {
         Op{
             time: 0,
             key: _key,
             release_time: 0,
-            rads: _rads
+            release_length: 0,
+            rads: _rads,
+            velocity: _velocity
         }
     }
     */
@@ -45,6 +46,7 @@ impl Op {
             release_time:self.time,
             release_length: (S_RELEASE as u64) / velocity,
             rads: self.rads,
+            velocity: 0,
         }
     }
 
@@ -73,25 +75,24 @@ impl Op {
 }
 
 fn apply_envelope(notes_playing:&mut HashSet<Op>) -> u64{
-        //*notes_playing = notes_playing.iter().cloned().filter(|Op| Op.envelope() != 0).collect()
-        let mut remove:Vec<Op> = Vec::new();    //new vector of notes that need to be removed.
-        let mut result = 0 as f64;
-        for note in notes_playing.iter(){   //loop through all notes_playing.
-            let env = note.envelope();  //call envelope function for each note.
-            if env ==  0.00{   //release is complete get rid of note. 
-                remove.push(*note); //add note to remove vector.
-            }
-            else{
-                result += env * note.calculate_amp(); //calculate sine wave and add to amp.
-            }
+    let mut remove:Vec<Op> = Vec::new();    //new vector of notes that need to be removed.
+    let mut result = 0 as f64;
+    for note in notes_playing.iter(){   //loop through all notes_playing.
+        let env = note.envelope();  //call envelope function for each note.
+        if env ==  0.00{   //release is complete get rid of note. 
+            remove.push(*note); //add note to remove vector.
         }
-        
-        for x in remove.iter_mut(){ //loop through remove vector and remove.
-            notes_playing.remove(x);   //remove note from notes_playing.
-        } 
-        remove.drain(..);   //empty the remove vector. 
-        
-        (0.1 * result) as u64   //return the amp to be played of all sine waves combined. 
+        else{
+            result += env * note.calculate_amp(); //calculate sine wave and add to amp.
+        }
+    }
+
+    for x in remove.iter_mut(){ //loop through remove vector and remove.
+        notes_playing.remove(x);   //remove note from notes_playing.
+    } 
+    remove.drain(..);   //empty the remove vector. 
+
+    (0.1 * result) as u64   //return the amp to be played of all sine waves combined. 
 }
 /* Purpose: Setup Midi connections to the keyboard and to one output port.  Most likely the output port will also be the keyboard. 
  * Once a NOTE_ON input is detected call the generate_sound() function that will take the broken down midi message and 
@@ -125,7 +126,7 @@ pub fn run() -> Result<(), Box<Error>> {
         CallbackResult::Continue 
     });
 
-    let stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
+    let _stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
     //while let Ok(true) = stream.is_active() {}
 /***********************************END_OF_CALLBACK**********************************/
     
@@ -158,17 +159,17 @@ pub fn run() -> Result<(), Box<Error>> {
                 if _velocity != 0{   //the key is only being pressed down. 
                     println!("Stamp {:?}, NoteOn {:?}",_stamp, message);
                     let mut data = buffer_copy.lock().unwrap(); //get mut function.
-                    data.insert(Op {time:0, key:note, release_time:0, release_length:0, rads:key_to_freq[note as usize] as u64});
+                    data.insert(Op{time:0, key:note, release_time:0, release_length:0, rads:key_to_freq[note as usize] as u64, velocity:_velocity});
                 } else{   //the  user has let go of the key NOTE_ON with 0 velocity.
                     println!("Stamp {:?}, NoteOff {:?}",_stamp, message);
                     let mut data = buffer_copy.lock().unwrap();    //lock clone of buffer.
-                    data.remove(&Op {time:0, key:note, release_time:0, release_length:0, rads:0});  //remove this note. 
+                    data.remove(&Op {time:0, key:note, release_time:0, release_length:0, rads:0, velocity:0});  //remove this note. 
                 }
             },
             Ok(NoteOff(_, note, _velocity)) => {
                println!("Stamp {:?}, NoteOff {:?}",_stamp, message);
                let mut data = buffer_copy.lock().unwrap();    //lock clone of buffer.
-               data.remove(&Op {time:0, key:note, release_time:0, release_length:0, rads:0});  //remove this note. 
+               data.remove(&Op {time:0, key:note, release_time:0, release_length:0, rads:0, velocity:0});  //remove this note. 
 
             },
             _ => {}}
