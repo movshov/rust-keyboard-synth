@@ -9,8 +9,8 @@ To run this program a couple of prerequisites are needed. Most essentially you n
 
 To install Rust run these commands: <br/>
 ```curl https://sh.rustup.rs -sSf | sh ```<br/>
-```rustup component rustfmt add```<br/>
-```rustup component clippy add ``` <br/>
+```rustup component add rustfmt```<br/>
+```rustup component add clippy``` <br/>
 
 To run the program clone the repositry to your local machine. Change directory to keyboard `cd keyboard` then type `cargo run`. Rust's cargo manager will download all dependencies needed for the program to run. Once the program begins it will display the following prompt: 
 
