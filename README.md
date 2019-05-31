@@ -16,8 +16,8 @@ To run the program clone the repositry to your local machine. Change directory t
 
 
 # Resources Used:
-Sound Stream - https://github.com/RustAudio/sound_stream/blob/master/examples/sine.rs
-Bart's Example - https://github.com/pdx-cs-sound/fm/blob/master/fm.py
-Midi message breakdown - https://github.com/wmedrano/wmidi/blob/master/src/lib.rs 
-Midi message reader - https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs
-Standard MIDI NOTE to Frequency - https://newt.phys.unsw.edu.au/jw/notes.html
+Sound Stream - https://github.com/RustAudio/sound_stream/blob/master/examples/sine.rs <br/>
+Bart's Example - https://github.com/pdx-cs-sound/fm/blob/master/fm.py <br/>
+Midi message breakdown - https://github.com/wmedrano/wmidi/blob/master/src/lib.rs <br/>
+Midi message reader - https://github.com/Boddlnagg/midir/blob/master/examples/test_forward.rs <br/>
+Standard MIDI NOTE to Frequency - https://newt.phys.unsw.edu.au/jw/notes.html <br/>
