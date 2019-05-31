@@ -5,7 +5,7 @@ CS410 Rust Programming
 This code is a Rust polyphonic synthesizer that grabs midi inputs and plays the corresponding sound through the local audio (laptop/Desktop speakers). Note that currently 1-3 notes simultaneously have no issues. 4 note simultaneously produces a small amount of static and 5 notes simultaneously produces unrecognizable static noise. 
 
 # Running
-To run this program a couple of prerequisites are needed. Most essentially you need to have a midi keyboard connected before running the program, it will not start otherwise. You must also have Rust installed on your computer. 
+To run this program a couple of prerequisites are needed. Most essentially you need to have a midi keyboard connected before running the program. You must also have Rust installed on your computer. 
 
 To install Rust run these commands: <br/>
 ```curl https://sh.rustup.rs -sSf | sh ```<br/>
