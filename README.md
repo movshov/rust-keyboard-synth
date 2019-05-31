@@ -8,9 +8,9 @@ This code is a Rust polyphonic synthesizer that grabs midi inputs and plays the 
 To run this program a couple of prerequisites are needed. Most essentially you need to have a midi keyboard connected before running the program, it will not start otherwise. You must also have Rust installed on your computer. 
 
 To install Rust run these commands: 
-```curl https://sh.rustup.rs -sSf | sh ```
-```rustup component rustfmt add```
-```rustup component clippy add ``` 
+```curl https://sh.rustup.rs -sSf | sh ```<br/>
+```rustup component rustfmt add```<br/>
+```rustup component clippy add ``` <br/>
 
 To run the program clone the repositry to your local machine. Change directory to keyboard `cd keyboard` then type `cargo run`. Rust's cargo manager will download all dependencies needed for the program to run. Once the program begins it will display the following prompt: 
 
