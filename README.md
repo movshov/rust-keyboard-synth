@@ -7,7 +7,7 @@ This code is a Rust polyphonic synthesizer that grabs midi inputs and plays the 
 # Running
 To run this program a couple of prerequisites are needed. Most essentially you need to have a midi keyboard connected before running the program, it will not start otherwise. You must also have Rust installed on your computer. 
 
-To install Rust run these commands: 
+To install Rust run these commands: <br/>
 ```curl https://sh.rustup.rs -sSf | sh ```<br/>
 ```rustup component rustfmt add```<br/>
 ```rustup component clippy add ``` <br/>
