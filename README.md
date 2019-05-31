@@ -1,6 +1,6 @@
 # rust-keyboard-synth
-(c) Bar Movshovich 2019 . 
-(c) Larry Chiem 2019 . 
+(c) Bar Movshovich 2019 <br/>
+(c) Larry Chiem 2019\
 (c) Andrew Wyatt 2019 <br/>
 CS410 Rust Programming/ CS410 Computer, Sound, and Music
 
