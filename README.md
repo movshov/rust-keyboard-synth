@@ -19,7 +19,7 @@ To install Rust run these commands: <br/>
 ```rustup component add rustfmt```<br/>
 ```rustup component add clippy``` <br/>
 
-To run the program clone the repositry to your local machine 'git clone https://github.com/movshov/rust-keyboard-synth.git'. Change directory to keyboard `cd keyboard` then type `cargo run`. Rust's cargo manager will download all dependencies needed for the program to run. Once the program begins it will display the following prompt: 
+To run the program clone the repositry to your local machine `git clone https://github.com/movshov/rust-keyboard-synth.git`. Change directory to keyboard `cd keyboard` then type `cargo run`. Rust's cargo manager will download all dependencies needed for the program to run. Once the program begins it will display the following prompt: 
 
 
 # Resources Used:
