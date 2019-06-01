@@ -9,7 +9,7 @@
 Class: CS410 Rust Programming/ CS410 Computer, Sound, and Music
 
 # Purpose 
-This code is a Rust polyphonic synthesizer that grabs midi inputs and plays the corresponding sound through the local audio (laptop/Desktop speakers). Note that currently 1-3 notes simultaneously have no issues. 4 note simultaneously produces a small amount of static and 5 notes simultaneously produces unrecognizable static noise. This code is heavily based off of Bart Masseys Python synthesizer. The envelope and apply_envelope functions in this program are directly based off of his example. 
+This code is a Rust polyphonic synthesizer that grabs midi inputs and plays the corresponding sound through the local audio (laptop/Desktop speakers). Note that currently 1-3 notes simultaneously have no issues. 4 note simultaneously produces a small amount of static and 5 notes simultaneously produces unrecognizable static noise. This code is heavily based off of Bart Massey's Python synthesizer. The envelope and apply_envelope functions in this program are directly based off of his example. 
 
 # Running
 To run this program a couple of prerequisites are needed. Most essentially you need to have a midi keyboard connected before running the program. You must also have Rust installed on your computer. 
