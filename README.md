@@ -1,9 +1,9 @@
 # Rust-Keyboard-Synthesizer
-(c) Copyright 2019 Bar Movshovich 2019 <br/>
+(c) Copyright 2019 Bar Movshovich <br/>
     Email: movshov@pdx.edu <br/>
-(c) Copyright 2019 Larry Chiem 2019 <br/>
+(c) Copyright 2019 Larry Chiem <br/>
     Email: clarry@pdx.edu <br/>
-(c) Copyright 2019 Andrew Wyatt 2019 <br/>
+(c) Copyright 2019 Andrew Wyatt <br/>
     Email: wyat2@pdx.edu <br/>
     
 Class: CS410 Rust Programming/ CS410 Computer, Sound, and Music
