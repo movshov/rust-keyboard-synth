@@ -1,4 +1,4 @@
-# rust-keyboard-synth
+# Rust-Keyboard-Synthesizer
 (c) Copyright 2019 Bar Movshovich 2019 <br/>
     Email: movshov@pdx.edu <br/>
 (c) Copyright 2019 Larry Chiem 2019 <br/>
