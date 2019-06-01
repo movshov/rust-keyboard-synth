@@ -1,11 +1,12 @@
 # rust-keyboard-synth
-(c) Bar Movshovich 2019 <br/>
+(c) Copyright 2019 Bar Movshovich 2019 <br/>
     Email: movshov@pdx.edu <br/>
-(c) Larry Chiem 2019 <br/>
+(c) Copyright 2019 Larry Chiem 2019 <br/>
     Email: clarry@pdx.edu <br/>
-(c) Andrew Wyatt 2019 <br/>
+(c) Copyright 2019 Andrew Wyatt 2019 <br/>
     Email: wyat2@pdx.edu <br/>
-CS410 Rust Programming/ CS410 Computer, Sound, and Music
+    
+Class: CS410 Rust Programming/ CS410 Computer, Sound, and Music
 
 This code is a Rust polyphonic synthesizer that grabs midi inputs and plays the corresponding sound through the local audio (laptop/Desktop speakers). Note that currently 1-3 notes simultaneously have no issues. 4 note simultaneously produces a small amount of static and 5 notes simultaneously produces unrecognizable static noise. 
 
