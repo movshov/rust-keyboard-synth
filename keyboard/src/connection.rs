@@ -4,6 +4,7 @@
  * can be done to fix this so it may sound a little slow to play the 
  * notes. 
  */
+use num::traits::clamp;
 use std::io::{stdin, stdout, Write}; 
 use std::error::Error; 
 use std::collections::HashSet;
@@ -21,8 +22,7 @@ const T_ATTACK:f64 =  0.010;
 const S_ATTACK:f64 =  RATE * T_ATTACK;  //480.
 
 #[derive(Hash, Eq, PartialEq, Debug, Copy, Clone)]
-struct NoteInfo {
-    time: u64,
+struct NoteInfo { time: u64,
     key: u8,
     release_time: i64,
     release_length: i64,
@@ -73,6 +73,8 @@ impl NoteInfo {
         return 1.00;
     }
 
+
+
     /*Using the key_to_freq vector, that we calculated earlier which hold all radian values, grab
      * the radian value for "self.key". Next, calculate the volume we need to use with the 
      * velocity_conversion function. Finally, generate a sine wave to return by passing in the
@@ -120,7 +122,6 @@ fn apply_envelope(notes_playing:&mut HashSet<NoteInfo>, key_to_freq:Vec<f64>) ->
     }
     //empty the remove vector.
     remove.drain(..);
-    //return the amp to be played of all sine waves combined.
     return 0.1 * result    
 }
 /* Purpose: This run function has two main parts. The first being a callback sound stream that will 
@@ -151,16 +152,30 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             //lock the data so we can use it.
             let mut data = buffer_clone.lock().unwrap(); 
             //apply our envelope to 
-            let amp:f32 = apply_envelope(&mut data, key_clone) as f32; 
+            let mut amp:f32 = apply_envelope(&mut data, key_clone) as f32; 
+            let length = data.len() as f32;
 
             for channel in frame {
+                let x = clamp(amp * 32767.00, -32767.00, 32767.00);
+                if x == -32767.00{
+                    amp = -1.0;
+                }
+                if x == 32767.00{
+                    amp = 1.0;
+                }
                 *channel = amp;
+                //if we are done playing notes give 0. 
+                if *channel >= length{
+                    *channel = 0.0;
+                }
             }
         }
         CallbackResult::Continue 
     });
 
-    let _stream = SoundStream::new().output(StreamParams::new()).run_callback(callback).unwrap();
+    let _stream = SoundStream::new()
+        .frames_per_buffer(512)
+        .output(StreamParams::new()).run_callback(callback).unwrap();
     //while let Ok(true) = stream.is_active() {}
     /***********************************END_OF_CALLBACK**********************************/
 
