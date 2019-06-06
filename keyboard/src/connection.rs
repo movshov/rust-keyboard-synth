@@ -24,8 +24,7 @@ const S_ATTACK:f64 =  RATE * T_ATTACK;  //480.
 struct NoteInfo {
     time: u64,
     key: u8,
-    release_time: i64,
-    release_length: i64,
+    release: Option<(u64, u64)>,
     velocity: u8
 }
 
@@ -34,43 +33,34 @@ impl NoteInfo {
         NoteInfo{
             time: 0,
             key: _key,
-            release_time: -1,
-            release_length: -1,
+            release: None,
             velocity: _velocity,
         }
     }
     //fn off(&self) -> NoteInfo {
 
     fn off(&mut self){
-        /*NoteInfo{
-            time: self.time,
-            key: self.key,
-            release_time: self.time as i64,
-            release_length: (S_RELEASE /(self.velocity as f64)) as i64,
-            velocity: self.velocity,
-        }
-        */
-        self.release_time = self.time as i64;
-        self.release_length = (S_RELEASE/(self.velocity as f64)) as i64;
+        let release_length = (S_RELEASE / self.velocity as f64) as u64;
+        self.release = Some((self.time, release_length));
     }
 
     /*This envelope is based off of Bart Massey's Envelope in his fm.py file
      * lines 83 - 94. Credit for this function goes directly to him. This is the 
      * same function implemented in Rust. 
      */
-    fn envelope(&self) -> f64{
-        let time = self.time as f64;
-        if self.release_time != -1{
-            let rt = time - (self.release_time) as f64;
-            if rt >= self.release_length as f64{
-                return -1.00;
+    fn envelope(&self) -> Option<f64> {
+        let time = self.time;
+        if let Some((t, r)) = self.release {
+            let rt = time - t;
+            if rt >= r  {
+                return None;
             }
-            return 1.00 - (rt / self.release_length as f64) as f64
+            return Some(1.00 - (rt as f64 / r as f64));
         }
-        if time < S_ATTACK{
-            return time/S_ATTACK as f64;
+        if (time as f64) < S_ATTACK {
+            return Some(time as f64 / S_ATTACK);
         }
-        return 1.00;
+        Some(1.00)
     }
 
     /*Using the key_to_freq vector, that we calculated earlier which hold all radian values, grab
@@ -98,19 +88,18 @@ fn apply_envelope(notes_playing:&mut HashSet<NoteInfo>, key_to_freq:Vec<f64>) ->
         //call envelope function for each note.
         let env = note.envelope();  
         //if the note is done playing. 
-        if env ==  -1.00{
-            println!("Release is complete get rid of the note\n");
-            //add note to remove vector to be removed later. 
-            remove.push(*note); 
-            continue
-        }
-        else{
+        if let Some(a) = env {
             let key_clone = key_to_freq.clone();
             let mut note_copy = note.clone();
             //calculate sine wave and add to amp.
-            result += env * note_copy.calculate_sin(key_clone); 
+            result += a * note_copy.calculate_sin(key_clone); 
             remove.push(*note);
             notes_playing.insert(note_copy);
+        } else {
+            println!("Release is complete get rid of the note\n");
+            //add note to remove vector to be removed later. 
+            remove.push(*note);
+            continue;
         }
     }
     //loop through remove vector and remove.
@@ -248,7 +237,7 @@ fn note_to_frequency(_hz_to_rads:f64, _note:f64) -> f64{
 
 //Calculate volume based off of velocity.
 fn velocity_conversion(velocity:u8)->f64{
-    (velocity as f64 + 25.00)/150.00
+    (velocity as f64 + 25.00)/152.00
 }
 
 /*
