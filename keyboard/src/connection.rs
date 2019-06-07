@@ -78,6 +78,7 @@ impl NoteInfo {
     }
 }
 
+
 fn apply_envelope(notes_playing:&mut HashSet<NoteInfo>, key_to_freq:Vec<f64>) -> f64{
     //new vector of notes that need to be removed.
     let mut remove:Vec<NoteInfo> = Vec::new();    
@@ -87,7 +88,6 @@ fn apply_envelope(notes_playing:&mut HashSet<NoteInfo>, key_to_freq:Vec<f64>) ->
     for note in notes_playing.clone().iter(){   
         //call envelope function for each note.
         let env = note.envelope();  
-        //if the note is done playing. 
         if let Some(a) = env {
             let key_clone = key_to_freq.clone();
             let mut note_copy = note.clone();
@@ -96,7 +96,7 @@ fn apply_envelope(notes_playing:&mut HashSet<NoteInfo>, key_to_freq:Vec<f64>) ->
             remove.push(*note);
             notes_playing.insert(note_copy);
         } else {
-            println!("Release is complete get rid of the note\n");
+            println!("Release is complete get rid of the note");
             //add note to remove vector to be removed later. 
             remove.push(*note);
             continue;
@@ -131,7 +131,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     //create a Mutex containing Hashset of notes currently playing.
     let _buffer = Arc::new(Mutex::new(HashSet::<NoteInfo>::new()));    
 
-    /*************************************CALLBACK_START ***********************************/
+    /************************************* CALLBACK_START ***********************************/
     let buffer_clone = Arc::clone(&_buffer);
     //Start the callback stream to continously play. 
     let callback = Box::new(move |output: &mut[f32], settings: Settings, _, _: CallbackFlags|{
@@ -153,7 +153,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     //while let Ok(true) = stream.is_active() {}
     /***********************************END_OF_CALLBACK**********************************/
 
-    /************************ MIDI_START**************************************/
+    /************************ MIDI_START **************************************/
     let mut input = String::new(); 
     let mut midi_in = MidiInput::new("midir input")?;
     midi_in.ignore(Ignore::None);
@@ -227,7 +227,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-/*********************************MIDI_END************************************/
+/********************************* MIDI_END ************************************/
 
 //Convert a note to its corresponding frequency then to its radian value. 
 fn note_to_frequency(_hz_to_rads:f64, _note:f64) -> f64{
@@ -240,6 +240,80 @@ fn velocity_conversion(velocity:u8)->f64{
     (velocity as f64 + 25.00)/152.00
 }
 
+
+/******************************* TESTS ***************************************/
+
+#[test]
+fn note_to_frequency_tests(){
+    let _hz_to_rads = 2.00 * PI / RATE as f64; 
+    let input_1 = 45.00;
+    let input_2 = 69.00;
+    let input_3 = 76.00;
+    assert_eq!(note_to_frequency(_hz_to_rads, input_1),0.014398966328953218); 
+    assert_eq!(note_to_frequency(_hz_to_rads, input_2),0.05759586531581287); 
+    assert_eq!(note_to_frequency(_hz_to_rads, input_3),0.08629629260151864); 
+}
+#[test]
+#[should_panic]
+fn note_to_frequency_fail(){
+    let _hz_to_rads = 2.00 * PI / RATE as f64; 
+    let input_1 = 76.00;
+    assert_eq!(note_to_frequency(_hz_to_rads, input_1),0.86296292601518640); 
+}
+
+#[test]
+fn radian_vector_tests(){
+let _hz_to_rads = 2.00 * PI / RATE as f64; 
+let mut key_to_freq: Vec<f64> = Vec::new(); 
+    for key in 0..=128 {
+        //call the note_to_frequency function which converts a midi key to its frequency. 
+        //Then using our _hz_to_rads conversion factor convert the frequency to radians. 
+        key_to_freq.push(note_to_frequency(_hz_to_rads, key as f64));
+    }
+    let index_1 = 39;
+    let index_2 = 48;
+    let index_3 = 99;
+
+    assert_eq!(key_to_freq[index_1 as usize], 0.010181606733279589);
+    assert_eq!(key_to_freq[index_2 as usize], 0.017123353207075778);
+    assert_eq!(key_to_freq[index_3 as usize], 0.325811415464946845);
+}
+
+#[test]
+#[should_panic]
+fn radian_vector_fail(){
+let _hz_to_rads = 2.00 * PI / RATE as f64; 
+let mut key_to_freq: Vec<f64> = Vec::new(); 
+    for key in 0..=128 {
+        //call the note_to_frequency function which converts a midi key to its frequency. 
+        //Then using our _hz_to_rads conversion factor convert the frequency to radians. 
+        key_to_freq.push(note_to_frequency(_hz_to_rads, key as f64));
+    }
+    let index_1 = 39;
+
+    assert_eq!(key_to_freq[index_1 as usize], 0.10181606733279589);
+
+
+}
+
+#[test]
+fn velocity_tests(){
+    let volume_1 = 1;
+    let volume_2 = 50;
+    let volume_3 = 80;
+
+    assert_eq!(velocity_conversion(volume_1), 0.17105263157894737);
+    assert_eq!(velocity_conversion(volume_2), 0.4934210526315789);
+    assert_eq!(velocity_conversion(volume_3), 0.6907894736842105);
+}
+
+#[test]
+#[should_panic]
+fn velocity_fail(){
+    let volume_1 = 80;
+
+    assert_eq!(velocity_conversion(volume_1), 0.907894736842105);
+}
 /*
 /*Purpose: Generate a sine wave of a given frequency. 
 */
@@ -252,8 +326,4 @@ fn piano_sine(phase: f64) -> f32 {
 }
 */
 
-/*Purpose: Generate a sound having been given the frequency and the velocity.  
- * note should now be the frequency that we want to play. 
- * velocity is how hard the user pressed the piano key assuming that the keyboard has 
- * way of recording velocity.
- */
+

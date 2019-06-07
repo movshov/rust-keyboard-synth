@@ -1,0 +1,1 @@
+/Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/target/debug/keyboard-3ff04e98b6903a0c.dSYM: /Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/src/connection.rs /Users/barmovshovich/sound/keyboard/rust-keyboard-synth/keyboard/src/main.rs
