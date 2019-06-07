@@ -1,0 +1,1 @@
+{"rustc":7052314952459834523,"features":"[\"default\", \"use_std\"]","target":4281640834757134876,"profile":9935990280773120926,"path":13360245033418157734,"deps":[["cfg-if v0.1.7","cfg_if",4556347963896764067]],"local":[{"Precalculated":"0.2.2"}],"rustflags":[],"edition":"Edition2015"}

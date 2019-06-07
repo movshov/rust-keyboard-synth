@@ -12,3 +12,23 @@ piston = "0.42.0"
 piston2d-graphics = "0.30.0"
 pistoncore-glutin_window = "0.54.0"
 piston2d-opengl_graphics = "0.59.0"
+midly = "0.1"
+clap = "2.32"
+indoc = "0.3"
+font-kit = "0.1"
+piano_keyboard = "0.2"
+sdl2_timing = { path = "./sdl2_timing" }
+
+# Dependencies for hacked stderrlog
+chrono = "0.4"
+termcolor = "0.3.3"
+thread_local = "0.3"
+
+[dependencies.sdl2]
+version = "0.31"
+default-features = false
+features = ["gfx","ttf"]
+
+[dependencies.log]
+version = "0.4"
+features = ["std"]

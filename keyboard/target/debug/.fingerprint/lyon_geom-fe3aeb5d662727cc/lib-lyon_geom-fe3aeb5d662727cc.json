@@ -1,0 +1,1 @@
+{"rustc":7052314952459834523,"features":"[]","target":9217048557969240441,"profile":9935990280773120926,"path":12910658282161274925,"deps":[["arrayvec v0.4.10","arrayvec",5036637894938619136],["euclid v0.19.8","euclid",5410141000441105936],["num-traits v0.2.6","num_traits",11548724569072161383]],"local":[{"Precalculated":"0.12.6"}],"rustflags":[],"edition":"Edition2018"}
